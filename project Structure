@@ -1,0 +1,17 @@
+/ecotracker
+  /src
+    /controllers
+      authController.js
+      activityController.js
+    /models
+      User.js
+      Activity.js
+    /routes
+      authRoutes.js
+      activityRoutes.js
+    /middlewares
+      authMiddleware.js
+    config.js
+    server.js
+  /public
+    index.html

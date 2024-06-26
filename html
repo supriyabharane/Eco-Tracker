@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoTracker</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 0; 
+      padding: 0; 
+      background-image: url('https://toppng.com/uploads/preview/jungle-forest-fog-trees-bushes-tropics-11569776717zox2o2dxef.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: #110b0b;
+    }
+    header, footer { 
+      background-color: rgba(0, 0, 0, 0.8); 
+      color: #fff; 
+      padding: 1em; 
+      text-align: center; 
+    }
+    nav ul { 
+      list-style: none; 
+      padding: 0; 
+      margin: 0; 
+      display: flex; 
+      justify-content: center; 
+    }
+    nav ul li { 
+      margin: 0 1em; 
+    }
+    nav ul li a { 
+      color: #fff; 
+      text-decoration: none; 
+    }
+    form { 
+      margin: 1em 0; 
+      background-color: rgba(0, 0, 0, 0.5); 
+      padding: 1em; 
+      border-radius: 5px;
+    }
+    #logout { 
+      display: none; 
+      cursor: pointer; 
+      color: red; 
+    }
+    main { 
+      padding: 1em; 
+    }
+    #home, #login, #signup, #dashboard { 
+      max-width: 600px; 
+      margin: 0 auto; 
+      text-align: center; 
+    }
+    #home img { 
+      width: 100%; 
+      height: auto; 
+      border-radius: 5px;
+    }
+    form label { 
+      display: block; 
+      margin-bottom: 0.5em; 
+    }
+    form input { 
+      width: 100%; 
+      padding: 0.5em; 
+      margin-bottom: 1em; 
+      border: none; 
+      border-radius: 5px;
+    }
+    form button { 
+      padding: 0.5em 2em; 
+      background-color: #28a745; 
+      color: #fff; 
+      border: none; 
+      cursor: pointer; 
+      border-radius: 5px;
+    }
+    form button:hover { 
+      background-color: #218838; 
+    }
+    @media (max-width: 600px) {
+      nav ul { 
+        flex-direction: column; 
+      }
+      nav ul li { 
+        margin: 0.5em 0; 
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="#" onclick="showPage('home')">Home</a></li>
+        <li><a href="#" onclick="showPage('login')">Login</a></li>
+        <li><a href="#" onclick="showPage('signup')">Signup</a></li>
+        <li><a href="#" onclick="showPage('dashboard')">Dashboard</a></li>
+        <li id="logout" onclick="logout()">Logout</li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div id="home">
+      <h1>Welcome to EcoTracker</h1>
+      <p>Track and reduce your personal environmental impact.</p>
+      <img src="https://mir-s3-cdn-cf.behance.net/projects/404/17a4c8196373439.Y3JvcCwyNTYyLDIwMDQsMTIwLDA.png">
+    </div>
+
+    <div id="login" style="display: none;">
+      <h1>Login</h1>
+      <form id="loginForm">
+        <label>Email: <input type="email" name="email" required></label>
+        <label>Password: <input type="password" name="password" required></label>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+
+    <div id="signup" style="display: none;">
+      <h1>Signup</h1>
+      <form id="signupForm">
+        <label>Email: <input type="email" name="email" required></label>
+        <label>Password: <input type="password" name="password" required></label>
+        <button type="submit">Signup</button>
+      </form>
+    </div>
+
+    <div id="dashboard" style="display: none;">
+      <h1>Dashboard</h1>
+      <form id="activityForm">
+        <label>Activity Type: <input type="text" name="type" required></label>
+        <label>Value: <input type="number" name="value" required></label>
+        <button type="submit">Log Activity</button>
+      </form>
+      <ul id="activitiesList"></ul>
+    </div>
+  </main>
+
+  <footer>
+    <p>EcoTracker &copy; 2024</p>
+  </footer>
+
+  <script>
+    let token = '';
+
+    function showPage(page) {
+      document.getElementById('home').style.display = 'none';
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('signup').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById(page).style.display = 'block';
+    }
+
+    document.getElementById('loginForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(formData))
+      });
+      const result = await response.json();
+      if (response.ok) {
+        token = result.token;
+        showPage('dashboard');
+        loadActivities();
+        document.getElementById('logout').style.display = 'inline';
+      } else {
+        alert(result.error);
+      }
+    };
+
+    document.getElementById('signupForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(formData))
+      });
+      const result = await response.json();
+      if (response.ok) {
+        token = result.token;
+        showPage('dashboard');
+        document.getElementById('logout').style.display = 'inline';
+      } else {
+        alert(result.error);
+      }
+    };
+
+    document.getElementById('activityForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const response = await fetch('/api/activities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(Object.fromEntries(formData))
+      });
+      const result = await response.json();
+      if (response.ok) {
+        loadActivities();
+      } else {
+        alert(result.error);
+      }
+    };
+
+    async function loadActivities() {
+      const response = await fetch('/api/activities', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const activities = await response.json();
+      const activitiesList = document.getElementById('activitiesList');
+      activitiesList.innerHTML = '';
+      activities.forEach(activity => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${activity.type}: ${activity.value}`;
+        activitiesList.appendChild(listItem);
+      });
+    }
+
+    function logout() {
+      token = '';
+      showPage('home');
+      document.getElementById('logout').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
